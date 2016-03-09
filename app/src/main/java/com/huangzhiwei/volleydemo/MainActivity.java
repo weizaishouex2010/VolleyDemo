@@ -15,6 +15,7 @@ import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -30,14 +31,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        volley_Get();
+//        volley_Get();
 
         //volley_Post();
         imageView = (ImageView) findViewById(R.id.id_img);
         networkimg = (NetworkImageView) findViewById(R.id.id_networkimageview);
-        volley_Image();
+//        volley_Image();
+        volley_GsonRequest();
 
+    }
 
+    private void volley_GsonRequest() {
+        GsonRequest<People> gsonRequest = new GsonRequest<People>("http://wx.yunzs.com.cn/apiv2/sysUserDoctor/myDoctor.json?openId=oH62xs_B5urvxwuCHPLv_NOBdm0Q",People.class,new Response.Listener<People>() {
+            @Override
+            public void onResponse(People people) {
+
+                Toast.makeText(MainActivity.this,people.isSuccess()+" "+people.getData().size(),Toast.LENGTH_SHORT).show();
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(MainActivity.this,volleyError.toString(),Toast.LENGTH_SHORT).show();
+                    }
+                } );
+        MyApplication.getHttpQueue().add(gsonRequest);
     }
 
     private void volley_Image() {
@@ -65,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         networkimg.setDefaultImageResId(R.drawable.ic_launcher);
         networkimg.setErrorImageResId(R.drawable.ic_launcher);
         networkimg.setImageUrl(url,loader);
+
     }
 
     private void volley_Post() {
@@ -110,10 +129,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void volley_Get() {
         String url = "http://wx.yunzs.com.cn/apiv2/sysUserDoctor/myDoctor.json?openId=oH62xs_B5urvxwuCHPLv_NOBdm0Q";
+//        String url = "http://www.weather.com.cn/data/sk/101010100.html";
         StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                Gson gson =new Gson();
+                People p = gson.fromJson(s,People.class);
+                Toast.makeText(MainActivity.this,p.toString(),Toast.LENGTH_SHORT).show();
             }
         }, new Response.ErrorListener() {
             @Override
@@ -123,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         request.setTag("abeGet");
-//        MyApplication.getHttpQueue().add(request);
+        MyApplication.getHttpQueue().add(request);
 
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url,null,
@@ -146,19 +168,19 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        VolleyRequest.RequestGet(this, url, "abcGet", new VolleyClass(this,VolleyClass.listener,VolleyClass.errorListener) {
-            @Override
-            public void onMySuccess(Object o) {
-                Toast.makeText(MainActivity.this,o.toString(),Toast.LENGTH_SHORT).show();
-
-            }
-
-            @Override
-            public void onMyError(VolleyError error) {
-                Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
-
-            }
-        });
+//        VolleyRequest.RequestGet(this, url, "abcGet", new VolleyClass(this,VolleyClass.listener,VolleyClass.errorListener) {
+//            @Override
+//            public void onMySuccess(Object o) {
+//                Toast.makeText(MainActivity.this,o.toString(),Toast.LENGTH_SHORT).show();
+//
+//            }
+//
+//            @Override
+//            public void onMyError(VolleyError error) {
+//                Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
+//
+//            }
+//        });
     }
 
     @Override
